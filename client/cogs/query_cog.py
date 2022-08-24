@@ -67,6 +67,42 @@ class Query(commands.Cog):
                             "```\nUnknown Exception: [{0}]\n```".format(e))
         else:
             await ctx.channel.send(embed=embed)
+    
+    @commands.command(
+        aliases=['q','full']
+    )
+    async def quote(self, ctx, *, arg):
+        """This command queries for a full quote for a given ticker_list"""
+        # split single argument into list of tickers
+        ticker_list = arg.split(",")
+        print(ticker_list)
+        # ticker type validity check
+        for ticker in ticker_list:
+            if not isinstance(ticker, str) or ticker.isdigit():
+                await ctx.reply("**Error** | I can't recognize this ticker:`[{0}]` :warning:\n".format(ticker)+\
+                                "```\n{0}trade <ticker>\n```".format(os.getenv('PREFIX')))
+                return
+        
+        # query for quote
+        try:
+            # futu api
+            quote = quote_df(self.api_quote_ctx, ticker_list)
+            # craft embed
+            embed = discord.Embed(
+                title       = "Here is your queried result.",
+                description = "Queried tickers: {0}\n\u200b\n:warning:\
+                    *quotes are provided by Futu OpenAPI, \
+                    and shall be used for reference only.*".format(ticker_list),
+                colour      = discord.Colour.from_str(os.getenv('DEFAULT_COLOUR'))
+            )
+        except Exception as e:
+            print("[WARNING] quick_quote command failed")
+            print("[WARNING]", traceback.format_exc())
+            await ctx.reply("**Error** | The command could not be processed! :warning:\n"+\
+                            "```\nUnknown Exception: [{0}]\n```".format(e))
+        else:
+            await ctx.channel.send(embed=embed)
+            await ctx.channel.send("```{0}```".format(quote))
 
 async def setup(bot):
     await bot.add_cog(Query(bot, debug=False))

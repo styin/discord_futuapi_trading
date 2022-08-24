@@ -47,3 +47,16 @@ def sim_quote(quote_ctx, ticker) -> dict:
     else:
         print("[ERROR] ", data)
         return None
+
+def quote_df(quote_ctx, ticker_list):
+    """returns a pandas.DataFrame as quote for a given ticker list"""
+    ret, data = quote_ctx.ctx.get_market_snapshot(ticker_list)
+    
+    if ret == RET_OK:
+        data = data.iloc[:,:8]
+        data.to_markdown(tablefmt="grid")
+        print(data)
+        return data
+    else:
+        print("[ERROR] ", data)
+        return None
